@@ -1,0 +1,20 @@
+{
+  "name": "TIFFYAI Claim Reminder",
+  "short_name": "TIFFY Reminder",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000015",
+  "theme_color": "#4af0f8",
+  "icons": [
+    {
+      "src": "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
