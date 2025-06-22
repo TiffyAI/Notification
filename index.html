@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TIFFY Claim Reminder</title>
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker Registered'))
+        .catch((err) => console.error('❌ SW error:', err));
+    }
+  </script>
+  <style>
+    body {
+      background: linear-gradient(145deg, #000015, #001F3F);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #4af0f8;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00e1ff;
+    }
+
+    #notifyBtn {
+      background: linear-gradient(90deg, #00ffc3, #9055ff);
+      border: none;
+      border-radius: 12px;
+      padding: 15px 30px;
+      font-size: 18px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 20px #00ffc3;
+      transition: all 0.3s ease;
+    }
+
+    #notifyBtn:hover {
+      box-shadow: 0 0 30px #4af0f8;
+      transform: scale(1.05);
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #00ffc3;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔔 Get Daily TIFFY Claim Reminders</h1>
+  <button id="notifyBtn">Remind Me to Claim at 10AM</button>
+  <div id="status"></div>
+
+  <script>
+    const notifyBtn = document.getElementById('notifyBtn');
+    const status = document.getElementById('status');
+
+    notifyBtn.onclick = async () => {
+      if (!('Notification' in window)) {
+        status.innerText = "❌ Your browser doesn't support notifications.";
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        status.innerText = "🔕 Notifications are blocked.";
+        return;
+      }
+
+      scheduleDailyNotification();
+      status.innerText = "✅ Daily reminder set for 10AM!";
+    };
+
+    function scheduleDailyNotification() {
+      if (localStorage.getItem('tiffyReminderSet')) return;
+
+      const now = new Date();
+      const next10AM = new Date();
+      next10AM.setHours(10, 0, 0, 0);
+      if (now.getTime() > next10AM.getTime()) {
+        next10AM.setDate(next10AM.getDate() + 1);
+      }
+
+      const delay = next10AM.getTime() - now.getTime();
+      setTimeout(() => {
+        showClaimNotification();
+        setInterval(showClaimNotification, 86400000); // 24 hours
+      }, delay);
+
+      localStorage.setItem('tiffyReminderSet', 'true');
+    }
+
+    function showClaimNotification() {
+      const notification = new Notification("⏰ It's 10AM! Claim Your Free TIFFY Now!", {
+        body: "Tap here to open your Dream Menu and collect your daily key.",
+        icon: "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png"
+      });
+
+      notification.onclick = () => window.open("/Dream-Menu", "_blank");
+    }
+  </script>
+
+</body>
+</html>
