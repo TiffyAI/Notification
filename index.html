@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TIFFY Claim Notifier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://tiffyai.github.io/Blue-Key-Claim/Reward3.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Orbitron', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #00ffff;
+      text-shadow: 0 0 15px #00ffff, 0 0 30px #ff00ff;
+      margin-bottom: 30px;
+    }
+
+    #notifyBtn {
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle at center, #ff00ff, #00ffff);
+      border: 4px solid #ffffff50;
+      border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff, inset 0 0 10px #ffffff80;
+      animation: pulseKeyhole 2s infinite;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    #notifyBtn:hover {
+      transform: scale(1.1);
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #00ffc3;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    @keyframes pulseKeyhole {
+      0% {
+        box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff, inset 0 0 5px #ffffff70;
+      }
+      50% {
+        box-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff, inset 0 0 10px #ffffff;
+      }
+      100% {
+        box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff, inset 0 0 5px #ffffff70;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔑 TIFFY Claim Notification</h1>
+  <button id="notifyBtn">Unlock</button>
+  <div id="status"></div>
+
+  <script>
+    let swRegistration;
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then((registration) => {
+          console.log('✅ Service Worker Registered');
+          swRegistration = registration;
+        })
+        .catch((err) => console.error('❌ SW error:', err));
+    }
+
+    const notifyBtn = document.getElementById('notifyBtn');
+    const status = document.getElementById('status');
+
+    notifyBtn.onclick = async () => {
+      if (!('Notification' in window)) {
+        status.innerText = "❌ Your browser doesn't support notifications.";
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        status.innerText = "🔕 Notifications are blocked.";
+        return;
+      }
+
+      status.innerText = "✅ TIFFY alerts are ON every 24 Hours!";
+      startReminderLoop();
+    };
+
+    function startReminderLoop() {
+      setTimeout(() => {
+        sendNotificationToSW();
+      }, 10000); // First after 10s
+
+      setInterval(() => {
+        sendNotificationToSW();
+      }, 86400000); // 24 hours
+    }
+
+    function sendNotificationToSW() {
+      if (swRegistration && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SHOW_NOTIFICATION'
+        });
+      } else {
+        console.warn('⚠️ Service worker not ready yet.');
+      }
+    }
+  </script>
+
+</body>
+</html>
