@@ -64,53 +64,49 @@
   <div id="status"></div>
 
   <script>
-    const notifyBtn = document.getElementById('notifyBtn');
-    const status = document.getElementById('status');
+  const notifyBtn = document.getElementById('notifyBtn');
+  const status = document.getElementById('status');
 
-    notifyBtn.onclick = async () => {
-      if (!('Notification' in window)) {
-        status.innerText = "❌ Your browser doesn't support notifications.";
-        return;
-      }
-
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        status.innerText = "🔕 Notifications are blocked.";
-        return;
-      }
-
-      scheduleDailyNotification();
-      status.innerText = "✅ Daily reminder set for 10AM!";
-    };
-
-    function scheduleDailyNotification() {
-      if (localStorage.getItem('tiffyReminderSet')) return;
-
-      const now = new Date();
-      const next10AM = new Date();
-      next10AM.setHours(10, 0, 0, 0);
-      if (now.getTime() > next10AM.getTime()) {
-        next10AM.setDate(next10AM.getDate() + 1);
-      }
-
-      const delay = next10AM.getTime() - now.getTime();
-      setTimeout(() => {
-        showClaimNotification();
-        setInterval(showClaimNotification, 86400000); // 24 hours
-      }, delay);
-
-      localStorage.setItem('tiffyReminderSet', 'true');
+  notifyBtn.onclick = async () => {
+    if (!('Notification' in window)) {
+      status.innerText = "❌ Your browser doesn't support notifications.";
+      return;
     }
 
-    function showClaimNotification() {
-      const notification = new Notification("⏰ It's 10AM! Claim Your Free TIFFY Now!", {
-        body: "Tap here to open your Dream Menu and collect your daily key.",
-        icon: "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png"
-      });
-
-      notification.onclick = () => window.open("/Dream-Menu", "_blank");
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      status.innerText = "🔕 Notifications are blocked.";
+      return;
     }
-  </script>
+
+    scheduleFrequentNotification();
+    status.innerText = "✅ TIFFY alert every 3 minutes activated!";
+  };
+
+  function scheduleFrequentNotification() {
+    // Always reset for test purposes
+    localStorage.setItem('tiffyReminderSet', 'true');
+
+    // Show first notification after 10 seconds
+    setTimeout(() => {
+      showClaimNotification();
+    }, 10000); // 10s delay for testing
+
+    // Repeat every 3 minutes
+    setInterval(() => {
+      showClaimNotification();
+    }, 180000); // 3 min = 180000 ms
+  }
+
+  function showClaimNotification() {
+    const notification = new Notification("⏰ Time to Claim Your TIFFY!", {
+      body: "Click to collect your daily key and boost your bag!",
+      icon: "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png"
+    });
+
+    notification.onclick = () => window.open("/Dream-Menu", "_blank");
+  }
+</script>
 
 </body>
 </html>
