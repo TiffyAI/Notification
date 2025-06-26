@@ -4,14 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TIFFY Claim Reminder</title>
+
+  <!-- Manifest & Theme Color -->
   <link rel="manifest" href="manifest.json" />
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('✅ Service Worker Registered'))
-        .catch((err) => console.error('❌ SW error:', err));
-    }
-  </script>
+  <meta name="theme-color" content="#4af0f8" />
+
   <style>
     body {
       background: linear-gradient(145deg, #000015, #001F3F);
@@ -60,53 +57,59 @@
 <body>
 
   <h1>🔔 Get Daily TIFFY Claim Reminders</h1>
-  <button id="notifyBtn">Remind Me to Claim at 10AM</button>
+  <button id="notifyBtn">Remind Me Every 3 Minutes</button>
   <div id="status"></div>
 
   <script>
-  const notifyBtn = document.getElementById('notifyBtn');
-  const status = document.getElementById('status');
-
-  notifyBtn.onclick = async () => {
-    if (!('Notification' in window)) {
-      status.innerText = "❌ Your browser doesn't support notifications.";
-      return;
+    // Service Worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker Registered'))
+        .catch((err) => console.error('❌ SW error:', err));
     }
 
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      status.innerText = "🔕 Notifications are blocked.";
-      return;
+    const notifyBtn = document.getElementById('notifyBtn');
+    const status = document.getElementById('status');
+
+    notifyBtn.onclick = async () => {
+      if (!('Notification' in window)) {
+        status.innerText = "❌ Your browser doesn't support notifications.";
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        status.innerText = "🔕 Notifications are blocked.";
+        return;
+      }
+
+      status.innerText = "✅ TIFFY alert every 3 minutes activated!";
+      startNotificationLoop();
+    };
+
+    function startNotificationLoop() {
+      // Initial test notification after 10 seconds
+      setTimeout(() => {
+        sendClaimNotification();
+      }, 10000);
+
+      // Repeat every 3 minutes
+      setInterval(() => {
+        sendClaimNotification();
+      }, 180000);
     }
 
-    scheduleFrequentNotification();
-    status.innerText = "✅ TIFFY alert every 3 minutes activated!";
-  };
+    function sendClaimNotification() {
+      if (Notification.permission === 'granted') {
+        const notification = new Notification("⏰ Time to Claim Your TIFFY!", {
+          body: "Click to collect your daily key and boost your bag!",
+          icon: "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png"
+        });
 
-  function scheduleFrequentNotification() {
-    // Always reset for test purposes
-    localStorage.setItem('tiffyReminderSet', 'true');
-
-    // Show first notification after 10 seconds
-    setTimeout(() => {
-      showClaimNotification();
-    }, 10000); // 10s delay for testing
-
-    // Repeat every 3 minutes
-    setInterval(() => {
-      showClaimNotification();
-    }, 180000); // 3 min = 180000 ms
-  }
-
-  function showClaimNotification() {
-    const notification = new Notification("⏰ Time to Claim Your TIFFY!", {
-      body: "Click to collect your daily key and boost your bag!",
-      icon: "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png"
-    });
-
-    notification.onclick = () => window.open("/Dream-Menu", "_blank");
-  }
-</script>
+        notification.onclick = () => window.open("/Dream-Menu", "_blank");
+      }
+    }
+  </script>
 
 </body>
 </html>
