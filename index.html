@@ -34,40 +34,58 @@
   <div id="status"></div>
 
   <script>
-    const notifyBtn = document.getElementById('notifyBtn');
-    const status = document.getElementById('status');
+  let swRegistration;
 
-    notifyBtn.onclick = async () => {
-      if (!("Notification" in window)) {
-        status.innerText = "❌ Notifications not supported.";
-        return;
-      }
+  // Register service worker and store reference
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then((registration) => {
+        console.log('✅ Service Worker Registered');
+        swRegistration = registration;
+      })
+      .catch((err) => console.error('❌ SW error:', err));
+  }
 
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        status.innerText = "🔕 Notifications denied.";
-        return;
-      }
+  const notifyBtn = document.getElementById('notifyBtn');
+  const status = document.getElementById('status');
 
-      status.innerText = "✅ Notifications enabled. First one in 10 seconds, then every 3 minutes.";
-
-      // Test: first one in 10 seconds
-      setTimeout(() => showClaimNotification(), 10000);
-
-      // Repeat every 3 minutes
-      setInterval(() => {
-        showClaimNotification();
-      }, 180000);
-    };
-
-    function showClaimNotification() {
-      const notification = new Notification("🔔 Claim Your TIFFY Now!", {
-        body: "Time to collect your free Blue Key.",
-        icon: "https://tiffyai.github.io/On-boarding-/TiffyAI-Token.png"
-      });
-
-      notification.onclick = () => window.open("/Dream-Menu", "_blank");
+  notifyBtn.onclick = async () => {
+    if (!('Notification' in window)) {
+      status.innerText = "❌ Your browser doesn't support notifications.";
+      return;
     }
-  </script>
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      status.innerText = "🔕 Notifications are blocked.";
+      return;
+    }
+
+    status.innerText = "✅ TIFFY alerts are ON every 3 minutes!";
+    startReminderLoop();
+  };
+
+  function startReminderLoop() {
+    // First one after 10s
+    setTimeout(() => {
+      sendNotificationToSW();
+    }, 10000);
+
+    // Then every 3 mins
+    setInterval(() => {
+      sendNotificationToSW();
+    }, 180000); // 3 min = 180000 ms
+  }
+
+  function sendNotificationToSW() {
+    if (swRegistration && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SHOW_NOTIFICATION'
+      });
+    } else {
+      console.warn('⚠️ Service worker not ready yet.');
+    }
+  }
+</script>
 </body>
 </html>
