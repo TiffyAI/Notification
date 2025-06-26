@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>TIFFY Test Notifier</title>
+  <title>TIFFY Claim Notifier</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
@@ -29,8 +29,8 @@
   </style>
 </head>
 <body>
-  <h1>Test TIFFY Notification</h1>
-  <button id="notifyBtn">Enable Notifications</button>
+  <h1>TIFFY Claim Notification</h1>
+  <button id="notifyBtn">Unlock</button>
   <div id="status"></div>
 
   <script>
@@ -61,7 +61,7 @@
       return;
     }
 
-    status.innerText = "✅ TIFFY alerts are ON every 3 minutes!";
+    status.innerText = "✅ TIFFY alerts are ON every 24 Hours!";
     startReminderLoop();
   };
 
@@ -74,7 +74,7 @@
     // Then every 3 mins
     setInterval(() => {
       sendNotificationToSW();
-    }, 180000); // 3 min = 180000 ms
+    }, 86400000); // 24 Hrs = 86400000 ms
   }
 
   function sendNotificationToSW() {
